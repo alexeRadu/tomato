@@ -4,7 +4,7 @@ import tomato
 from tomato import rules
 
 rules.add("main.o", ["main.c"], ['gcc -c {1}'])
-rules.add("test" , ["main.o", "gigi.o"], ['gcc -o {0} {1}'])
+rules.add("test" , ["main.o"], ['gcc -o {0} {1}'])
 rules.add("clean", [], ['rm main.o test'])
 
-rules.run(sys.argv[1:])
+rules.run(sys.argv[1:], dryrun=False)
