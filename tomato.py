@@ -1,63 +1,46 @@
 #!/usr/bin/python
 import os
 
+global rules
+
 class Rules:
     def __init__(self):
         self.rules = []
         self.default = None
 
     def add(self, target, prereqs, recipes):
-        parent = Rule(target)
-
-        print(target)
-
-        for p in prereqs:
-            child = None
-
-            for r in self.rules:
-                if p == r.target:
-                    child = r
-                    break
-
-            if not child:
-                child = Rule(p)
-                self.rules.append(child)
-
-            parent.add_prereq(child)
-
-        parent.add_recipes(recipes)
-        self.rules.append(parent)
+        r = Rule(target, prereqs, recipes)
+        self.rules.append(r)
 
         if not self.default:
-            self.default = parent
+            self.default = r
 
-    def run(self, default=None):
+    def run(self, default=[]):
         if not default:
-            if not self.default:
+            if self.default:
                 self.default.run()
         else:
             for r in self.rules:
-                if r.target == default:
+                if r.target == default[0]:
                     r.run()
 
     def __str__(self):
-        return list(r.__str__() for r in self.rules).__str__()
+        return "\n".join(r.__str__() for r in self.rules)
+
+rules = Rules()
 
 
 class Rule:
-    def __init__(self, target):
+    def __init__(self, target, prereqs, recipes):
         self.target = target
-        self.prereqs = []
-        self.recipes = None
-
-    def add_prereq(self, prereq):
-        self.prereqs.append(prereq)
-
-    def add_recipes(self, recipes):
+        self.prereqs = prereqs
         self.recipes = recipes
 
     def __str__(self):
-        return "{} -> {}".format(self.target, " ".join(p.__str__() for p in self.prereqs))
+        if self.prereqs:
+            return "{}: {}".format(self.target, " ".join(self.prereqs))
+        else:
+            return self.target
 
     def run(self, dryrun=False):
         for r in self.recipes:
